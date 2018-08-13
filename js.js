@@ -23,19 +23,19 @@ function change(){
 }
 */
 
-const health_set = 30, prana_set = 30;
+const HEALTH_SET = 30, PRANA_SET = 30, MONEY_SET = 1500;
 var arr = [
-    ["Время", "00:01:02", ""],
-    ["Создан", "00:01:02", ""],
-    ["Здоровье", "отсечка " + health_set, "0"],
-    ["Прана", "отсечка " + prana_set, "0"],
-    ["На арену", "возможность отправки", "0"]
+    ["Время", "создан", ""],
+    ["Здоровье", "отсечка " + HEALTH_SET, ""],
+    ["Прана", "отсечка " + PRANA_SET, ""],
+    ["Денег", "отсечка " + MONEY_SET, ""],
+    ["На арену", "возможность отправки", ""]
 ];
 
 function inic(){
     if ( ! document.getElementById("my_test_block") ) {
         new_Date = new Date();
-        arr[1][1] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
+        arr[0][1] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
 
         var div_block = document.createElement('div'), div_block_content = document.createElement('div'), div_block_end_line = document.createElement('div');
         var div_equ = document.getElementById("equipment");
@@ -70,13 +70,21 @@ function loop(){
     inic();
 
     new_Date = new Date();
-    arr[0][1] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
+    arr[0][0] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
+    arr[1][2] = (document.getElementById("hk_health").getElementsByClassName("l_val") )[0].innerHTML;
+    arr[1][2] = arr[1][2].substring( 0 , arr[1][2].indexOf("/") - 1 );
+    arr[2][2] = (document.getElementById("cntrl").getElementsByClassName("gp_val") )[0].innerHTML;
+    arr[2][2] = arr[2][2].slice( 0 , -1 );
+    arr[3][2] = (document.getElementById("hk_gold_we").getElementsByClassName("l_val") )[0].innerHTML;
+    arr[3][2] = Number(arr[3][2].replace(/\D+/g,""))
+
 
     var div_block_line;
     arr.forEach(function(item, i, arr) {
         div_block_line = document.getElementById("my_line_" + i);
-        ( div_block_line.getElementsByClassName("eq_name") )[0].innerHTML = item[1];
-        ( div_block_line.getElementsByClassName("eq_level") )[0].innerHTML = item[2];
+        if ( ( div_block_line.getElementsByClassName("eq_capt") )[0].innerHTML != item[0] ) ( div_block_line.getElementsByClassName("eq_capt") )[0].innerHTML = item[0];
+        if ( ( div_block_line.getElementsByClassName("eq_name") )[0].innerHTML != item[1] ) ( div_block_line.getElementsByClassName("eq_name") )[0].innerHTML = item[1];
+        if ( ( div_block_line.getElementsByClassName("eq_level") )[0].innerHTML != item[2] ) ( div_block_line.getElementsByClassName("eq_level") )[0].innerHTML = item[2];
     });
 
 
