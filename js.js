@@ -23,14 +23,15 @@ function change(){
 }
 */
 
-const HEALTH_SET = 30, PRANA_SET = 30, MONEY_SET = 1500;
+const HEALTH_SET = 30, MONEY_SET = 1500;
 var arr = [
     ["Время", "создан", ""],
     ["Здоровье", "отсечка " + HEALTH_SET, ""],
-    ["Прана", "отсечка " + PRANA_SET, ""],
+    ["Прана", "зарядов", ""],
     ["Денег", "отсечка " + MONEY_SET, ""],
     ["На арену", "возможность отправки", ""]
 ];
+var hero = {};
 
 function inic(){
     if ( ! document.getElementById("my_test_block") ) {
@@ -73,10 +74,16 @@ function loop(){
     arr[0][0] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
     arr[1][2] = (document.getElementById("hk_health").getElementsByClassName("l_val") )[0].innerHTML;
     arr[1][2] = arr[1][2].substring( 0 , arr[1][2].indexOf("/") - 1 );
+    hero.health = +arr[1][2];
     arr[2][2] = (document.getElementById("cntrl").getElementsByClassName("gp_val") )[0].innerHTML;
     arr[2][2] = arr[2][2].slice( 0 , -1 );
+    hero.prana = +arr[2][2];
+    arr[2][1] = (document.getElementById("cntrl").getElementsByClassName("acc_val") )[0].innerHTML;
+    hero.acc = +arr[2][1];
+    arr[2][1] = "аккумулятор: " + arr[2][1];
     arr[3][2] = (document.getElementById("hk_gold_we").getElementsByClassName("l_val") )[0].innerHTML;
-    arr[3][2] = Number(arr[3][2].replace(/\D+/g,""))
+    arr[3][2] = Number(arr[3][2].replace(/\D+/g,""));
+    hero.gold = +arr[3][2];
 
 
     var div_block_line;
