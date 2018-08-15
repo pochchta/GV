@@ -8,24 +8,23 @@
 // ==/UserScript==
 
 var delay_counter = 0;
-var new_Date;
-//var last_id;
-const DELAY_SET = 60;
-/*
-function change(){
-    if (delay_counter > DELAY_SET){
-        //alert(delay_counter);
-        if (last_id != document.getElementsByClassName('orderOther')[0].getAttribute('orderid')){
-            new Audio('https://sound-pack.net/audio/sfx/94/windows_2000_notify.mp3').play();
-        }
-        last_id = document.getElementsByClassName('orderOther')[0].getAttribute('orderid');
-    }
-}
-*/
+const DELAY_SET = 10;
 
 const HEALTH_SET = 30, MONEY_SET = 1500;
+const TIME = 0,
+      EXP = 1,
+      TASK = 2,
+      KILL = 3,
+      HEALTH = 4,
+      PRANA = 5,
+      GOLD = 6,
+      ARENA = 7;
 var arr = [
-    ["Время", "создан", ""],
+  //[название], [подпись], [значение],
+    ["Прошло времени", "создан", ""],
+    ["Опыт", "было", "стало"],
+    ["Задание", "было", "стало"],
+    ["Убийств", "было", "стало"],
     ["Здоровье", "отсечка " + HEALTH_SET, ""],
     ["Прана", "зарядов", ""],
     ["Денег", "отсечка " + MONEY_SET, ""],
@@ -33,10 +32,23 @@ var arr = [
 ];
 var hero = {};
 
+function get_value_idcn(id, cn){
+    return (document.getElementById(id).getElementsByClassName(cn) )[0].innerHTML;
+}
+function get_title_idcn(id, cn){
+    return (document.getElementById(id).getElementsByClassName(cn) )[0].getAttribute("title");
+}
+function get_elem_idcn(id, cn){
+    return (document.getElementById(id).getElementsByClassName(cn) )[0];
+}
+
 function inic(){
     if ( ! document.getElementById("my_test_block") ) {
-        new_Date = new Date();
-        arr[0][1] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
+        var new_Date = new Date();
+        arr[TIME][1] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds() + " - (" + new_Date.getDay() + "." + new_Date.getMonth() +")";
+        arr[KILL][1] = get_value_idcn("hk_monsters_killed", "l_val");
+        arr[EXP][1] = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,"")) + "%";
+        arr[TASK][1] = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,"")) + "%";
 
         var div_block = document.createElement('div'), div_block_content = document.createElement('div'), div_block_end_line = document.createElement('div');
         var div_equ = document.getElementById("equipment");
@@ -70,21 +82,33 @@ function inic(){
 function loop(){
     inic();
 
-    new_Date = new Date();
-    arr[0][0] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
-    arr[1][2] = (document.getElementById("hk_health").getElementsByClassName("l_val") )[0].innerHTML;
-    arr[1][2] = arr[1][2].substring( 0 , arr[1][2].indexOf("/") - 1 );
-    hero.health = +arr[1][2];
-    arr[2][2] = (document.getElementById("cntrl").getElementsByClassName("gp_val") )[0].innerHTML;
-    arr[2][2] = arr[2][2].slice( 0 , -1 );
-    hero.prana = +arr[2][2];
-    arr[2][1] = (document.getElementById("cntrl").getElementsByClassName("acc_val") )[0].innerHTML;
-    hero.acc = +arr[2][1];
-    arr[2][1] = "аккумулятор: " + arr[2][1];
-    arr[3][2] = (document.getElementById("hk_gold_we").getElementsByClassName("l_val") )[0].innerHTML;
-    arr[3][2] = Number(arr[3][2].replace(/\D+/g,""));
-    hero.gold = +arr[3][2];
+    var new_Date = new Date();
+    arr[TIME][0] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds();
+    arr[TIME][2] = delay_counter;
+    arr[HEALTH][2] = get_value_idcn("hk_health", "l_val");
+    arr[HEALTH][2] = arr[HEALTH][2].substring( 0 , arr[HEALTH][2].indexOf("/") - 1 );
+    hero.health = +arr[HEALTH][2];
+    arr[PRANA][2] = get_value_idcn("cntrl", "gp_val");
+    arr[PRANA][2] = arr[PRANA][2].slice( 0 , -1 );
+    hero.prana = +arr[PRANA][2];
+    arr[PRANA][1] = get_value_idcn("cntrl", "acc_val");
+    hero.acc = +arr[PRANA][1];
+    arr[PRANA][1] = "аккумулятор: " + arr[PRANA][1];
+    arr[GOLD][2] = get_value_idcn("hk_gold_we", "l_val");
+    arr[GOLD][2] = Number(arr[GOLD][2].replace(/\D+/g,""));
+    hero.gold = +arr[GOLD][2];
+    arr[KILL][2] = get_value_idcn("hk_monsters_killed", "l_val");
+    arr[EXP][2] = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,"")) + "%";
+    arr[TASK][2] = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,"")) + "%";
 
+    //----------------------
+    // health_control
+    if ( (hero.health < HEALTH_SET ) && (delay_counter >= DELAY_SET) ){
+        delay_counter = 0;
+        //get_elem_idcn("cntrl1", "enc_link").click(); // сделать хорошо
+        //$(".enc_link")[0].click();
+    }
+    //-----------------------
 
     var div_block_line;
     arr.forEach(function(item, i, arr) {
@@ -94,9 +118,6 @@ function loop(){
         if ( ( div_block_line.getElementsByClassName("eq_level") )[0].innerHTML != item[2] ) ( div_block_line.getElementsByClassName("eq_level") )[0].innerHTML = item[2];
     });
 
-
-    delay_counter++;
-    if (delay_counter > DELAY_SET) delay_counter = 0;
+    if (delay_counter < DELAY_SET) delay_counter++;
 }
 var delay_id = setInterval(loop, 1000);
-//document.addEventListener('DOMNodeInserted', change);
