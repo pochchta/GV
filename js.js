@@ -108,9 +108,10 @@ function loop(){
     //----------------------
     // prana_auto_charge
     if (click_state && (delay_counter >= DELAY_SET)) {
-        if ( get_elem_idcn("acc_links_wrap", "ch_link") && (hero.prana < 3) && (hero.acc == 100) ){
+        if ( get_elem_idcn("acc_links_wrap", "ch_link") && (hero.acc < 3) && (hero.prana == 100) ){
+            delay_counter = 0;
             get_elem_idcn("acc_links_wrap", "ch_link").click();
-            alert("Проверка связи");
+            //alert("Проверка связи");
         }
     }
     //-----------------------
