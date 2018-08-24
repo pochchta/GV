@@ -17,9 +17,9 @@ var arr = {
    KILL: ["Убийств", "было", "стало"],
    EXP: ["Опыт", "было", "стало"],
    TASK: ["Задание", "было", "стало"],
-   HEALTH: ["Здоровье", "отсечка " + HEALTH_SET, ""],
+   //HEALTH: ["Здоровье", "отсечка " + HEALTH_SET, ""],
    PRANA: ["Прана", "зарядов", ""],
-   GOLD: ["Денег", "отсечка " + MONEY_SET, ""],
+   //GOLD: ["Денег", "отсечка " + MONEY_SET, ""],
    //ARENA: ["На арену", "возможность отправки", ""]
 };
 var hero = {};
@@ -34,14 +34,16 @@ function get_elem_idcn(id, cn){
     return (document.getElementById(id).getElementsByClassName(cn) )[0];
 }
 
-var click_state = 0;
+var click_state = 0, start_date = new Date();
 function inic(){
     if ( ! document.getElementById("my_test_block") ) {
-        var new_Date = new Date();
-        arr.TIME[1] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds() + " - (" + new_Date.getDate() + "." + (+new_Date.getMonth()+1) +")";
+        arr.TIME[1] = start_date.getHours() + ":" + start_date.getMinutes() + ":" + start_date.getSeconds() + " - (" + start_date.getDate() + "." + (+start_date.getMonth()+1) +")";
         arr.KILL[1] = get_value_idcn("hk_monsters_killed", "l_val");
-        arr.EXP[1] = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,"")) + "%";
-        arr.TASK[1] = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,"")) + "%";
+        hero.start_kill = +arr.KILL[1];
+        hero.start_exp = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,""));
+        arr.EXP[1] = hero.start_exp + "%"
+        hero.start_task = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,""));
+        arr.TASK[1] = hero.start_task + "%"
 
         var div_block = document.createElement('div'), div_block_content = document.createElement('div'), div_block_end_line = document.createElement('div');
         var div_equ = document.getElementById("equipment");
@@ -86,24 +88,39 @@ function inic(){
 function loop(){
     inic();
 
-    var new_Date = new Date();
-    arr.TIME[0] = new_Date.getHours() + ":" + new_Date.getMinutes() + ":" + new_Date.getSeconds() + " - (" + new_Date.getDate() + "." + (+new_Date.getMonth()+1) + ")" ;
+    var dif, new_date = new Date(), time = (new_date - start_date) / (1000*60*60); //time in hours
+    arr.TIME[0] = new_date.getHours() + ":" + new_date.getMinutes() + ":" + new_date.getSeconds();
     arr.TIME[2] = delay_counter;
-    arr.HEALTH[2] = get_value_idcn("hk_health", "l_val");
-    arr.HEALTH[2] = arr.HEALTH[2].substring( 0 , arr.HEALTH[2].indexOf("/") - 1 );
-    hero.health = +arr.HEALTH[2];
+    if (arr.HEALTH != undefined) {
+        arr.HEALTH[2] = get_value_idcn("hk_health", "l_val");
+        arr.HEALTH[2] = arr.HEALTH[2].substring( 0 , arr.HEALTH[2].indexOf("/") - 1 );
+        hero.health = +arr.HEALTH[2];
+    }
     arr.PRANA[2] = get_value_idcn("cntrl", "gp_val");
     arr.PRANA[2] = arr.PRANA[2].slice( 0 , -1 );
     hero.prana = +arr.PRANA[2];
     arr.PRANA[1] = get_value_idcn("cntrl", "acc_val");
     hero.acc = +arr.PRANA[1];
     arr.PRANA[1] = "аккумулятор: " + arr.PRANA[1];
-    arr.GOLD[2] = get_value_idcn("hk_gold_we", "l_val");
-    arr.GOLD[2] = Number(arr.GOLD[2].replace(/\D+/g,""));
-    hero.gold = +arr.GOLD[2];
+    if (arr.GOLD != undefined) {
+        arr.GOLD[2] = get_value_idcn("hk_gold_we", "l_val");
+        arr.GOLD[2] = Number(arr.GOLD[2].replace(/\D+/g,""));
+        hero.gold = +arr.GOLD[2];
+    }
     arr.KILL[2] = get_value_idcn("hk_monsters_killed", "l_val");
-    arr.EXP[2] = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,"")) + "%";
-    arr.TASK[2] = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,"")) + "%";
+    hero.kill = +arr.KILL[2];
+    dif = hero.kill - hero.start_kill;
+    arr.KILL[0] = "Убийств " + (time < 1 ? dif : (dif / time)).toFixed(2) + " в час";
+
+    hero.exp = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,""));
+    arr.EXP[2] = hero.exp + "%"
+    dif = hero.exp - hero.start_exp + (dif < 0 ? 100 : 0);
+    arr.EXP[0] = "Опыт " + (time < 1 ? dif : (dif / time)).toFixed(2) + "% в час";
+
+    hero.task = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,""));
+    arr.TASK[2] = hero.task + "%"
+    dif = hero.task - hero.start_task + (dif < 0 ? 100 : 0);
+    arr.TASK[0] = "Задание " + (time < 1 ? dif : (dif / time)).toFixed(2) + "% в час";
 
     //----------------------
     // prana_auto_charge
@@ -111,7 +128,6 @@ function loop(){
         if ( get_elem_idcn("acc_links_wrap", "ch_link") && (hero.acc < 3) && (hero.prana == 100) ){
             delay_counter = 0;
             get_elem_idcn("acc_links_wrap", "ch_link").click();
-            //alert("Проверка связи");
         }
     }
     //-----------------------
