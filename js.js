@@ -113,13 +113,15 @@ function loop(){
     arr.KILL[0] = "Убийств " + (time < 1 ? dif : (dif / time)).toFixed(2) + " в час";
 
     hero.exp = Number(get_title_idcn("hk_level", "p_bar").replace(/\D+/g,""));
-    arr.EXP[2] = hero.exp + "%"
-    dif = hero.exp - hero.start_exp + (dif < 0 ? 100 : 0);
+    arr.EXP[2] = hero.exp + "%";
+    hero.start_exp -= (hero.exp - hero.start_exp < 0) ? 100 : 0;
+    dif = hero.exp - hero.start_exp;
     arr.EXP[0] = "Опыт " + (time < 1 ? dif : (dif / time)).toFixed(2) + "% в час";
 
     hero.task = Number(get_title_idcn("hk_quests_completed", "p_bar").replace(/\D+/g,""));
     arr.TASK[2] = hero.task + "%"
-    dif = hero.task - hero.start_task + (dif < 0 ? 100 : 0);
+    hero.start_task -= (hero.task - hero.start_task < 0) ? 100 : 0;
+    dif = hero.task - hero.start_task;
     arr.TASK[0] = "Задание " + (time < 1 ? dif : (dif / time)).toFixed(2) + "% в час";
 
     //----------------------
